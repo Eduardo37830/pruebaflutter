@@ -1,0 +1,18 @@
+﻿{
+    "title":  "Dashboard",
+    "requestedId":  "2c36a80091bf4cb2862bdd3c9a872e25",
+    "generatedAt":  "2026-04-17T23:30:57.4780452-05:00",
+    "stitchResource":  "projects/5421380154936487609/screens/2c36a80091bf4cb2862bdd3c9a872e25",
+    "downloads":  [
+                      {
+                          "output":  "images/dashboard.png",
+                          "url":  "https://lh3.googleusercontent.com/aida/ADBb0uhWpjdwSlQP3Sg7iSsDq2JfneRfC1mm6fdb9L4O0UxhvXaYVn7VbMyHqNzDwbx4eGiFtj4PhRci9Eem7B2lc77DQJQtK9H2gf7xo5uJGh0TzZw6J5k14-pEtiRa0u9Pe3Ue8AukClqj2-pz2yb_D1S5zSDv4toIcqaSy0PT1m2F0I2RFnnJY3Hbxfc2cD9lADfUNZZuswVgcQX-sB6DzU9MfvqF-AvtJOw5kVnjDXAMKpDC1XkPzmspdVk",
+                          "type":  "image"
+                      },
+                      {
+                          "output":  "code/dashboard.html",
+                          "url":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzU0MDdlMDMxMmM5NTQxMzBhZTM4ZDc0M2VmNDhiOWZjEgsSBxDYjrP8hBIYAZIBIwoKcHJvamVjdF9pZBIVQhM1NDIxMzgwMTU0OTM2NDg3NjA5\u0026filename=\u0026opi=89354086",
+                          "type":  "code"
+                      }
+                  ]
+}

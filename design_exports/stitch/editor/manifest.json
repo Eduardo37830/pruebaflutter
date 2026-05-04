@@ -1,0 +1,18 @@
+﻿{
+    "title":  "Editor",
+    "requestedId":  "3443db3da7554653a4806d7d3d082155",
+    "generatedAt":  "2026-04-17T23:30:57.4780452-05:00",
+    "stitchResource":  "projects/5421380154936487609/screens/3443db3da7554653a4806d7d3d082155",
+    "downloads":  [
+                      {
+                          "output":  "images/editor.png",
+                          "url":  "https://lh3.googleusercontent.com/aida/ADBb0uj-jljRyA2CxAbUHA2v5MkJPSa5aclRLL_cCCw3CSsZ7JVOX3TQZz1I-5_3wdfSg48pRQ8LFlZkF7LwGbwq4MQYY2DVpJYSj-7zkOUe0yd-wdYsuhW0VLloHAFNXAHs6AotvPjnSYRmwiRFp9kXtfWzWAFoMEAExjtng3tBzzDyV6dlZ2aSzew7sOKqBlhl7gpn1YFfYTHO3G1Ftb9eoux0p66XduIloQZIMYo9OQhyAR8NnBLwAjaczQ",
+                          "type":  "image"
+                      },
+                      {
+                          "output":  "code/editor.html",
+                          "url":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzM5YmY4NmE5OTc2ZjRlODM5MzEyMGY3OTMxNmFhOTBlEgsSBxDYjrP8hBIYAZIBIwoKcHJvamVjdF9pZBIVQhM1NDIxMzgwMTU0OTM2NDg3NjA5\u0026filename=\u0026opi=89354086",
+                          "type":  "code"
+                      }
+                  ]
+}

@@ -1,0 +1,18 @@
+﻿{
+    "title":  "Login",
+    "requestedId":  "761e5e5d8a7943d1bb271ea45c7b53cb",
+    "generatedAt":  "2026-04-17T23:30:57.4780452-05:00",
+    "stitchResource":  "projects/5421380154936487609/screens/761e5e5d8a7943d1bb271ea45c7b53cb",
+    "downloads":  [
+                      {
+                          "output":  "images/login.png",
+                          "url":  "https://lh3.googleusercontent.com/aida/ADBb0uiH2p9cpzpj8aSE_R0WBBYQ1_vooGqMNm0ese2o7rG8jKDn8TzdDFFUc7FruGCYvEM84DyV_oxZhTqF5SKZc-leXNHoaiLccuqpD84-51VWdGZEvAAlRsjLWEzv9OtOjRNMAr2-jtrWZwFrHtg5KBzAiIW2RyEbo3DRsg9L4PCa_TpU6z-hLUSSLP08nSljnaNvkbNbJ7dtJ7Qxqm1GThlu-of2yorPIx3WNvxOOXYgmFf2vulfweHVMdg",
+                          "type":  "image"
+                      },
+                      {
+                          "output":  "code/login.html",
+                          "url":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzAwZTQ1ZGMwM2RhNjQ2NmZiZWMwYzVlMTQ1NmQxYmZhEgsSBxDYjrP8hBIYAZIBIwoKcHJvamVjdF9pZBIVQhM1NDIxMzgwMTU0OTM2NDg3NjA5\u0026filename=\u0026opi=89354086",
+                          "type":  "code"
+                      }
+                  ]
+}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Escritor Editor</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#c3a881",
+                    "outline": "#75777d",
+                    "on-secondary-container": "#54647a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#dbdad5",
+                    "surface-container-high": "#eae8e3",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#3a485c",
+                    "surface-bright": "#fbf9f4",
+                    "background": "#fbf9f4",
+                    "inverse-surface": "#30312e",
+                    "tertiary": "#38270a",
+                    "on-primary-container": "#9eadc5",
+                    "inverse-primary": "#b9c7e0",
+                    "surface-container-low": "#f5f3ee",
+                    "on-surface-variant": "#44474c",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-background": "#1b1c19",
+                    "on-primary-fixed": "#0d1c2f",
+                    "surface-tint": "#515f74",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-tertiary-fixed-variant": "#574424",
+                    "on-tertiary-fixed": "#281901",
+                    "tertiary-container": "#503d1e",
+                    "on-primary": "#ffffff",
+                    "surface": "#fbf9f4",
+                    "tertiary-fixed": "#fcdeb3",
+                    "outline-variant": "#c5c6cd",
+                    "on-error": "#ffffff",
+                    "on-surface": "#1b1c19",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e4e2dd",
+                    "surface-variant": "#e4e2dd",
+                    "inverse-on-surface": "#f2f1ec",
+                    "primary-fixed-dim": "#b9c7e0",
+                    "primary": "#1d2b3e",
+                    "surface-container": "#f0eee9",
+                    "primary-fixed": "#d5e3fd",
+                    "secondary": "#505f76",
+                    "tertiary-fixed-dim": "#dfc299",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-container": "#d0e1fb",
+                    "primary-container": "#334155",
+                    "on-secondary-fixed": "#0b1c30"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Newsreader", "serif"
+                    ],
+                    "body": [
+                            "Newsreader", "serif"
+                    ],
+                    "label": [
+                            "Manrope", "sans-serif"
+                    ]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom styling for the "pure" writing canvas experience */
+        [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: theme('colors.secondary');
+            pointer-events: none;
+            display: block;
+        }
+        
+        [contenteditable] {
+            caret-color: theme('colors.primary');
+        }
+
+        /* Ambient subtle shadow for the Inkwell */
+        .inkwell-shadow {
+            box-shadow: 0 8px 24px rgba(27, 28, 25, 0.06);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Minimal Header (Task-Focused Sub-page) -->
+<!-- Suppressing standard TopAppBar to prioritize the focused writing canvas -->
+<header class="flex justify-between items-center px-6 py-5 sticky top-0 z-20 bg-surface/90 backdrop-blur-xl">
+<button aria-label="Go back" class="text-on-surface hover:text-primary transition-colors flex items-center justify-center p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 300;">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="font-label text-[10px] uppercase tracking-widest text-outline">Unsaved Draft</span>
+<span class="font-label text-xs text-on-surface-variant mt-0.5">Words: 42</span>
+</div>
+<button aria-label="Options" class="text-on-surface hover:text-primary transition-colors flex items-center justify-center p-2 -mr-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 300;">more_vert</span>
+</button>
+</header>
+<!-- Main Writing Canvas -->
+<main class="flex-grow flex flex-col w-full max-w-2xl mx-auto px-8 md:px-12 pt-12 pb-48">
+<!-- Document Title -->
+<h1 class="outline-none text-4xl md:text-5xl font-headline font-medium text-on-surface mb-10 leading-tight" contenteditable="true" data-placeholder="The Title...">The Quiet Hour</h1>
+<!-- Document Body -->
+<div class="outline-none text-lg md:text-xl font-body text-on-surface leading-loose space-y-8" contenteditable="true" data-placeholder="Start writing...">
+<p>The dawn always brings a certain stillness. It is a quiet that is not merely the absence of sound, but a tangible presence. The kind of presence that settles over the desk, pulling the scattered thoughts of yesterday into a single, focused point.</p>
+<p>I looked at the blank page, noting how the slight texture of the paper seemed to catch the early light. There is an intimidation in starting, a fear of breaking the silence with the wrong words. Yet, the ink demands to be used.</p>
+</div>
+</main>
+<!-- The Inkwell (Minimalist Floating Toolbar) -->
+<!-- Suppressing standard BottomNavBar as this is a highly focused environment -->
+<div class="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-none px-4">
+<div class="bg-primary text-on-primary rounded-full px-6 py-3 flex items-center gap-6 inkwell-shadow pointer-events-auto transition-transform hover:scale-[1.02]">
+<button aria-label="Bold" class="hover:text-primary-fixed transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 400;">format_bold</span>
+</button>
+<button aria-label="Italic" class="hover:text-primary-fixed transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 400;">format_italic</span>
+</button>
+<!-- Structural separation without lines (using opacity/spacing) -->
+<div class="w-2 h-2 rounded-full bg-primary-container mx-1"></div>
+<button aria-label="Bulleted List" class="hover:text-primary-fixed transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 400;">format_list_bulleted</span>
+</button>
+<button aria-label="Quote" class="hover:text-primary-fixed transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 400;">format_quote</span>
+</button>
+<div class="w-2 h-2 rounded-full bg-primary-container mx-1"></div>
+<button aria-label="Highlight" class="text-tertiary-fixed hover:text-tertiary-fixed-dim transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 400;">ink_highlighter</span>
+</button>
+</div>
+</div>
+</body></html>

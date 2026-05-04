@@ -1,0 +1,18 @@
+﻿{
+    "generatedAt":  "2026-04-17T23:30:57.4780452-05:00",
+    "stitchResource":  "projects/5421380154936487609 screenInstance id assets-2a5cfd033fd746e5a6528c4dc09262ee-1776465001332",
+    "requestedId":  "asset-stub-assets-2a5cfd033fd746e5a6528c4dc09262ee-1776465001332",
+    "downloads":  [
+                      {
+                          "output":  "images/design_system_preview.png",
+                          "url":  "https://lh3.googleusercontent.com/aida/ADBb0uiH2p9cpzpj8aSE_R0WBBYQ1_vooGqMNm0ese2o7rG8jKDn8TzdDFFUc7FruGCYvEM84DyV_oxZhTqF5SKZc-leXNHoaiLccuqpD84-51VWdGZEvAAlRsjLWEzv9OtOjRNMAr2-jtrWZwFrHtg5KBzAiIW2RyEbo3DRsg9L4PCa_TpU6z-hLUSSLP08nSljnaNvkbNbJ7dtJ7Qxqm1GThlu-of2yorPIx3WNvxOOXYgmFf2vulfweHVMdg",
+                          "note":  "project thumbnail hosted URL",
+                          "type":  "image"
+                      }
+                  ],
+    "title":  "Design System",
+    "notes":  [
+                  "No hosted htmlCode URL was exposed by mcp_stitch_list_screens for the design system instance.",
+                  "Design tokens were exported to code/design_theme_tokens.json from project designTheme metadata."
+              ]
+}
