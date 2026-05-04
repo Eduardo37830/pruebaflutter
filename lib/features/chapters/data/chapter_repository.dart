@@ -7,6 +7,7 @@ import '../../../../data/local/drift/app_database.dart';
 import '../../../../data/local/drift/daos/chapter_dao.dart';
 import '../../../../data/local/drift/daos/project_dao.dart';
 import '../../../../data/local/drift/database_provider.dart';
+import '../../../../sync/engine/sync_engine.dart';
 
 part 'chapter_repository.g.dart';
 
@@ -14,8 +15,14 @@ class ChapterRepository {
   final ChapterDao _chapterDao;
   final ProjectDao _projectDao;
   final Dio _dio;
+  final SyncEngine _syncEngine;
 
-  ChapterRepository(this._chapterDao, this._projectDao, this._dio);
+  ChapterRepository(
+    this._chapterDao,
+    this._projectDao,
+    this._dio,
+    this._syncEngine,
+  );
 
   /// Observa la lista de capítulos por cada proyecto
   Stream<List<Chapter>> watchChaptersByProject(String projectLocalId) {
@@ -66,7 +73,18 @@ class ChapterRepository {
         ),
       );
     } on DioException {
-      // Queda en estado no sincronizado.
+      await _syncEngine.enqueueForRetry(
+        entityType: 'chapter',
+        entityLocalId: chapter.localId,
+        operation: 'create',
+        payload: {
+          'titulo_capitulo': chapter.tituloCapitulo,
+          'contenido': chapter.contenido,
+          'orden': chapter.orden,
+          'proyecto_id': resolvedRemoteProjectId,
+          'remote_project_id': resolvedRemoteProjectId,
+        },
+      );
     }
   }
 
@@ -104,7 +122,18 @@ class ChapterRepository {
         ),
       );
     } on DioException {
-      // Permanece con sincronizacion pendiente.
+      final remoteId = localUpdated.remoteId;
+      await _syncEngine.enqueueForRetry(
+        entityType: 'chapter',
+        entityLocalId: localUpdated.localId,
+        operation: 'update',
+        payload: {
+          'titulo_capitulo': localUpdated.tituloCapitulo,
+          'contenido': localUpdated.contenido,
+          'orden': localUpdated.orden,
+          if (remoteId != null) 'remote_id': remoteId,
+        },
+      );
     }
   }
 
@@ -130,7 +159,15 @@ class ChapterRepository {
         ),
       );
     } on DioException {
-      // Permanece con sincronizacion pendiente.
+      final remoteId = existing.remoteId;
+      await _syncEngine.enqueueForRetry(
+        entityType: 'chapter',
+        entityLocalId: existing.localId,
+        operation: 'delete',
+        payload: {
+          if (remoteId != null) 'remote_id': remoteId,
+        },
+      );
     }
   }
 
@@ -202,5 +239,6 @@ ChapterRepository chapterRepository(ChapterRepositoryRef ref) {
     ref.watch(chapterDaoProvider),
     ref.watch(projectDaoProvider),
     ref.watch(dioClientProvider),
+    ref.watch(syncEngineProvider),
   );
 }

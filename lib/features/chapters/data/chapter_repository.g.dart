@@ -6,7 +6,7 @@ part of 'chapter_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chapterRepositoryHash() => r'd71449a337ea135268c711ff0703964851bf2c3d';
+String _$chapterRepositoryHash() => r'f0aab23d2a878edb2e2d9ad4ffd5fd728e105c93';
 
 /// See also [chapterRepository].
 @ProviderFor(chapterRepository)

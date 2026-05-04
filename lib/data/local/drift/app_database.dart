@@ -9,6 +9,7 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'daos/project_dao.dart';
 import 'daos/chapter_dao.dart';
+import 'daos/sync_queue_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -58,7 +59,7 @@ class SyncQueue extends Table {
 
 @DriftDatabase(
   tables: [Projects, Chapters, SyncQueue],
-  daos: [ProjectDao, ChapterDao],
+  daos: [ProjectDao, ChapterDao, SyncQueueDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

@@ -7,6 +7,7 @@ import '../../../../data/local/drift/app_database.dart';
 import '../../../../data/local/drift/daos/chapter_dao.dart';
 import '../../../../data/local/drift/daos/project_dao.dart';
 import '../../../../data/local/drift/database_provider.dart';
+import '../../../../sync/engine/sync_engine.dart';
 import '../../auth/data/session_store.dart';
 
 part 'project_repository.g.dart';
@@ -16,12 +17,14 @@ class ProjectRepository {
   final ChapterDao _chapterDao;
   final Dio _dio;
   final SessionStore _sessionStore;
+  final SyncEngine _syncEngine;
 
   ProjectRepository(
     this._projectDao,
     this._chapterDao,
     this._dio,
     this._sessionStore,
+    this._syncEngine,
   );
 
   /// Devuelve los proyectos locales de forma reactiva
@@ -114,7 +117,16 @@ class ProjectRepository {
 
       await _projectDao.updateProject(synced);
     } on DioException {
-      // Queda en pendiente de sincronizacion.
+      await _syncEngine.enqueueForRetry(
+        entityType: 'project',
+        entityLocalId: project.localId,
+        operation: 'create',
+        payload: {
+          'titulo': project.titulo,
+          'genero': project.genero,
+          'usuario_id': userId,
+        },
+      );
     }
   }
 
@@ -144,7 +156,17 @@ class ProjectRepository {
         ),
       );
     } on DioException {
-      // Permanece en estado no sincronizado.
+      final remoteId = localUpdated.remoteId;
+      await _syncEngine.enqueueForRetry(
+        entityType: 'project',
+        entityLocalId: localUpdated.localId,
+        operation: 'update',
+        payload: {
+          'titulo': localUpdated.titulo,
+          'genero': localUpdated.genero,
+          if (remoteId != null) 'remote_id': remoteId,
+        },
+      );
     }
   }
 
@@ -171,7 +193,15 @@ class ProjectRepository {
         ),
       );
     } on DioException {
-      // Permanece en estado no sincronizado.
+      final remoteId = existing.remoteId;
+      await _syncEngine.enqueueForRetry(
+        entityType: 'project',
+        entityLocalId: existing.localId,
+        operation: 'delete',
+        payload: {
+          if (remoteId != null) 'remote_id': remoteId,
+        },
+      );
     }
   }
 
@@ -196,5 +226,6 @@ ProjectRepository projectRepository(ProjectRepositoryRef ref) {
     ref.watch(chapterDaoProvider),
     ref.watch(dioClientProvider),
     ref.watch(sessionStoreProvider),
+    ref.watch(syncEngineProvider),
   );
 }

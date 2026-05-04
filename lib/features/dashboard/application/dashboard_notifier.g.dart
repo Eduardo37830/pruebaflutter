@@ -26,7 +26,7 @@ final dashboardProjectsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DashboardProjectsRef = AutoDisposeStreamProviderRef<List<Project>>;
-String _$dashboardNotifierHash() => r'11f21c2f39d2a33514de585571a95571db66df71';
+String _$dashboardNotifierHash() => r'9e959dcbd40042841fe473955e8b48240515e8aa';
 
 /// Controla acciones como creacion, y borrado de proyectos del tablero
 ///

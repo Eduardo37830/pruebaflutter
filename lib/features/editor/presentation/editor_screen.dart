@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/markdown_quill.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
+import '../../../core/network/upload_service.dart';
 import '../application/editor_notifier.dart';
 
 enum _ImageInsertSource { url, gallery }
@@ -1090,6 +1094,24 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     _insertImageEmbed(parsed.toString());
   }
 
+  Future<String> _copyImageToStorage(XFile pickedFile) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final imagesDir = Directory(p.join(dir.path, 'escritor_images'));
+    if (!await imagesDir.exists()) {
+      await imagesDir.create(recursive: true);
+    }
+
+    final ext = p.extension(pickedFile.path).isNotEmpty
+        ? p.extension(pickedFile.path)
+        : '.jpg';
+    final fileName =
+        'img_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final destPath = p.join(imagesDir.path, fileName);
+
+    await pickedFile.saveTo(destPath);
+    return destPath;
+  }
+
   Future<void> _insertImageFromGallery() async {
     final pickedFile = await _imagePicker.pickImage(
       source: ImageSource.gallery,
@@ -1101,7 +1123,26 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
       return;
     }
 
-    _insertImageEmbed(Uri.file(pickedFile.path).toString());
+    String imageSource;
+    try {
+      final localPath = await _copyImageToStorage(pickedFile);
+      imageSource = Uri.file(localPath).toString();
+
+      final uploadService = ref.read(uploadServiceProvider);
+      final result = await uploadService.uploadImage(localPath);
+      if (result != null) {
+        imageSource = result.url;
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al procesar la imagen')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    _insertImageEmbed(imageSource);
   }
 
   void _insertImageEmbed(String imageSource) {

@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'app_database.dart';
 import 'daos/project_dao.dart';
 import 'daos/chapter_dao.dart';
+import 'daos/sync_queue_dao.dart';
 
 part 'database_provider.g.dart';
 
@@ -20,4 +21,9 @@ ProjectDao projectDao(ProjectDaoRef ref) {
 @Riverpod(keepAlive: true)
 ChapterDao chapterDao(ChapterDaoRef ref) {
   return ref.watch(appDatabaseProvider).chapterDao;
+}
+
+@Riverpod(keepAlive: true)
+SyncQueueDao syncQueueDao(SyncQueueDaoRef ref) {
+  return ref.watch(appDatabaseProvider).syncQueueDao;
 }
