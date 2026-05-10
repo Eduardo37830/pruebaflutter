@@ -39,5 +39,19 @@ class SessionStore {
 
 @riverpod
 SessionStore sessionStore(SessionStoreRef ref) {
-  return const SessionStore(FlutterSecureStorage());
+  return const SessionStore(
+    FlutterSecureStorage(
+      aOptions: AndroidOptions(
+        encryptedSharedPreferences: true,
+        keyCipherAlgorithm:
+            KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
+        storageCipherAlgorithm:
+            StorageCipherAlgorithm.AES_GCM_NoPadding,
+      ),
+      iOptions: IOSOptions(
+        accessibility: KeychainAccessibility.first_unlock,
+        accountName: 'escritor_app_session',
+      ),
+    ),
+  );
 }

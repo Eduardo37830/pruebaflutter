@@ -20,19 +20,27 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _sessionStore.getToken();
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
+    try {
+      final token = await _sessionStore.getToken();
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+      handler.next(options);
+    } catch (e) {
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          error: 'Error al leer token de sesion: $e',
+        ),
+      );
     }
-    super.onRequest(options, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (err.response?.statusCode == 401) {
-      // Manejar logica si el token expiró (redireccionamiento, deslogueo)
       _sessionStore.clearSession();
     }
-    super.onError(err, handler);
+    handler.next(err);
   }
 }

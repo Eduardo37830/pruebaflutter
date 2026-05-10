@@ -49,6 +49,42 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
+  Future<void> register(String email, String password, String pseudonimo) async {
+    state = const AsyncValue.loading();
+
+    final sessionStore = ref.read(sessionStoreProvider);
+
+    try {
+      final response = await ref.read(dioClientProvider).post(
+        '/auth/register',
+        data: {'email': email, 'password': password, 'pseudonimo': pseudonimo},
+      );
+
+      final body = response.data;
+      if (body is! Map) {
+        throw Exception('Respuesta de registro invalida');
+      }
+
+      final token = body['token']?.toString();
+      if (token == null || token.isEmpty) {
+        throw Exception('No se recibio token de autenticacion');
+      }
+
+      final user = body['user'];
+      final userId = user is Map ? _asInt(user['id']) : null;
+
+      await sessionStore.saveToken(token);
+      if (userId != null) {
+        await sessionStore.saveUserId(userId);
+      }
+      state = const AsyncValue.data(true);
+    } on DioException catch (error, st) {
+      state = AsyncValue.error(_extractApiError(error), st);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
   Future<void> logout() async {
     state = const AsyncValue.loading();
     await ref.read(sessionStoreProvider).clearSession();

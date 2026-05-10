@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/application/auth_notifier.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 import '../../features/chapters/presentation/chapter_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/editor/presentation/editor_screen.dart';
@@ -17,18 +18,20 @@ GoRouter appRouter(AppRouterRef ref) {
   return GoRouter(
     initialLocation: '/onboarding',
     redirect: (context, state) {
-      if (authState is AsyncData) {
-        final isLoggedIn = authState.value ?? false;
-        final goingToAuth = state.matchedLocation == '/auth';
-        final goingToOnboarding = state.matchedLocation == '/onboarding';
+      if (authState.isLoading || authState is AsyncLoading) {
+        return null;
+      }
 
-        if (!isLoggedIn && !goingToAuth && !goingToOnboarding) {
-          return '/onboarding';
-        }
+      final isLoggedIn = authState.valueOrNull ?? false;
+      final location = state.matchedLocation;
+      final isAuthRoute = location == '/auth' || location == '/onboarding' || location == '/register';
 
-        if (isLoggedIn && (goingToAuth || goingToOnboarding)) {
-          return '/dashboard';
-        }
+      if (!isLoggedIn && !isAuthRoute) {
+        return '/onboarding';
+      }
+
+      if (isLoggedIn && isAuthRoute) {
+        return '/dashboard';
       }
 
       return null;
@@ -39,6 +42,7 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),

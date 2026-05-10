@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../data/local/drift/app_database.dart';
 import '../application/chapters_notifier.dart';
 
 class ChapterListScreen extends ConsumerWidget {
@@ -44,11 +45,7 @@ class ChapterListScreen extends ConsumerWidget {
                 leading: CircleAvatar(child: Text(chapter.orden.toString())),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () {
-                    ref
-                        .read(chaptersNotifierProvider.notifier)
-                        .deleteChapter(chapter.localId);
-                  },
+                  onPressed: () => _confirmDelete(context, ref, chapter),
                 ),
                 onTap: () {
                   context.push('/editor/$projectLocalId/${chapter.localId}');
@@ -107,6 +104,34 @@ class ChapterListScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Chapter chapter,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar capítulo'),
+        content: Text('¿Eliminar "${chapter.tituloCapitulo}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      ref.read(chaptersNotifierProvider.notifier).deleteChapter(chapter.localId);
+    }
   }
 
   String _markdownPreview(String markdown) {
