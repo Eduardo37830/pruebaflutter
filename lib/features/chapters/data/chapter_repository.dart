@@ -3,6 +3,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/utils/type_utils.dart';
 import '../../../../data/local/drift/app_database.dart';
 import '../../../../data/local/drift/daos/chapter_dao.dart';
 import '../../../../data/local/drift/daos/project_dao.dart';
@@ -66,7 +67,7 @@ class ChapterRepository {
 
       await _chapterDao.updateChapter(
         chapter.copyWith(
-          remoteId: Value(_asInt(body['id'])),
+          remoteId: Value(asInt(body['id'])),
           remoteProjectId: Value(resolvedRemoteProjectId),
           isSynced: true,
           lastModified: DateTime.now().millisecondsSinceEpoch,
@@ -90,6 +91,10 @@ class ChapterRepository {
 
   Future<int> getNextOrderForProject(String projectLocalId) {
     return _chapterDao.getNextOrderForProject(projectLocalId);
+  }
+
+  Future<void> updateChapterOrder(String localId, int newOrden) {
+    return _chapterDao.updateChapterOrder(localId, newOrden);
   }
 
   /// Actualiza los atributos del capítulo y reinicia la validacion de sync con backend
@@ -191,7 +196,7 @@ class ChapterRepository {
           continue;
         }
 
-        final remoteId = _asInt(item['id']);
+        final remoteId = asInt(item['id']);
         if (remoteId == null) {
           continue;
         }
@@ -204,7 +209,7 @@ class ChapterRepository {
           remoteId: remoteId,
           tituloCapitulo: (item['titulo_capitulo'] ?? 'Sin titulo').toString(),
           contenido: (item['contenido'] ?? '').toString(),
-          orden: _asInt(item['orden']) ?? 1,
+          orden: asInt(item['orden']) ?? 1,
           projectLocalId: existing?.projectLocalId ?? projectLocalId,
           remoteProjectId: remoteProjectId,
           isSynced: true,
@@ -219,18 +224,6 @@ class ChapterRepository {
     }
   }
 
-  int? _asInt(Object? value) {
-    if (value is int) {
-      return value;
-    }
-    if (value is num) {
-      return value.toInt();
-    }
-    if (value is String) {
-      return int.tryParse(value);
-    }
-    return null;
-  }
 }
 
 @riverpod

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/presentation/widgets/ambient_circle.dart';
+import '../../../core/presentation/widgets/gradient_button.dart';
+import '../../../core/utils/validation_constants.dart';
 import '../application/auth_notifier.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -30,10 +33,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _passwordError;
   String? _confirmError;
 
-  static final _emailRegex = RegExp(
-    r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$",
-  );
-
   void _validate() {
     setState(() {
       final email = _emailController.text.trim();
@@ -44,9 +43,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _pseudonimoError =
           pseudonimo.isEmpty ? 'El nombre de usuario es obligatorio' : null;
       _emailError =
-          email.isEmpty || !_emailRegex.hasMatch(email) ? 'Correo inválido' : null;
+          email.isEmpty || !emailRegex.hasMatch(email) ? 'Correo inválido' : null;
       _passwordError =
-          password.length < 6 ? 'Mínimo 6 caracteres' : null;
+          password.length < minPasswordLength ? 'Mínimo 6 caracteres' : null;
       _confirmError =
           confirm != password ? 'Las contraseñas no coinciden' : null;
     });
@@ -59,8 +58,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final pseudonimo = _pseudonimoController.text.trim();
 
     return pseudonimo.isNotEmpty &&
-        _emailRegex.hasMatch(email) &&
-        password.length >= 6 &&
+        emailRegex.hasMatch(email) &&
+        password.length >= minPasswordLength &&
         confirm == password;
   }
 
@@ -125,12 +124,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             Positioned(
               top: -90,
               right: -80,
-              child: _ambientCircle(scheme.surfaceContainerHigh, 300),
+              child: AmbientCircle(
+                color: scheme.surfaceContainerHigh,
+                size: 300,
+              ),
             ),
             Positioned(
               bottom: -120,
               left: -70,
-              child: _ambientCircle(scheme.surfaceContainer, 280),
+              child: AmbientCircle(
+                color: scheme.surfaceContainer,
+                size: 280,
+              ),
             ),
             SafeArea(
               child: Center(
@@ -245,51 +250,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            SizedBox(
-                              height: 54,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(999),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      scheme.primary,
-                                      scheme.primaryContainer,
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: scheme.shadow.withValues(alpha: 0.2),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: isLoading ? null : _register,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: const StadiumBorder(),
-                                  ),
-                                  child: isLoading
-                                      ? SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: scheme.onPrimary,
-                                          ),
-                                        )
-                                      : Text(
-                                          'Crear cuenta',
-                                          style: theme.textTheme.labelLarge
-                                              ?.copyWith(
-                                                color: scheme.onPrimary,
-                                                letterSpacing: 0.8,
-                                              ),
-                                        ),
-                                ),
-                              ),
+                            GradientButton(
+                              label: 'Crear cuenta',
+                              isLoading: isLoading,
+                              onPressed: isLoading ? null : _register,
                             ),
                             const SizedBox(height: 16),
                             TextButton(
@@ -308,17 +272,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _ambientCircle(Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.55),
-        shape: BoxShape.circle,
       ),
     );
   }

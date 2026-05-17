@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/presentation/widgets/confirm_delete_dialog.dart';
+import '../../../../core/presentation/widgets/offline_banner.dart';
+import '../../../../core/presentation/widgets/shimmer_loading.dart';
+import '../../../../core/presentation/widgets/theme_mode_provider.dart';
+import '../../../../core/utils/app_radius.dart';
 import '../../../../data/local/drift/app_database.dart';
 import '../application/dashboard_notifier.dart';
 import '../../auth/application/auth_notifier.dart';
@@ -16,6 +21,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _didInit = false;
 
   @override
   void dispose() {
@@ -29,12 +35,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final scheme = theme.colorScheme;
     final projectsAsyncValue = ref.watch(dashboardProjectsProvider);
 
+    if (!_didInit) {
+      _didInit = true;
+      Future.microtask(
+        () => ref.read(dashboardNotifierProvider.notifier).refreshFromBackend(),
+      );
+    }
+
     return Scaffold(
-      body: RefreshIndicator(
-        color: scheme.primary,
-        onRefresh: () =>
-            ref.read(dashboardNotifierProvider.notifier).refreshFromBackend(),
-        child: projectsAsyncValue.when(
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(
+            child: RefreshIndicator(
+              color: scheme.primary,
+              onRefresh: () =>
+                  ref.read(dashboardNotifierProvider.notifier).refreshFromBackend(),
+              child: projectsAsyncValue.when(
           data: (projects) {
             final filteredProjects = projects.where((project) {
               if (_searchQuery.trim().isEmpty) {
@@ -110,15 +127,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, st) => Center(child: Text('Error: $error')),
+          loading: () => CustomScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: MediaQuery.of(context).padding.top + 80)),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                sliver: SliverToBoxAdapter(child: ShimmerGrid()),
+              ),
+            ],
+          ),
+          error: (error, st) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text('Error: $error', textAlign: TextAlign.center),
+            ),
+          ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _mostrarDialogoNuevoProyecto(context, ref),
-        child: const Icon(Icons.add),
-      ),
-    );
+    ],
+  ),
+  floatingActionButton: FloatingActionButton(
+    onPressed: () => _mostrarDialogoNuevoProyecto(context, ref),
+    child: const Icon(Icons.add),
+  ),
+);
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -147,6 +181,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ref.read(dashboardNotifierProvider.notifier).refreshFromBackend();
           },
           icon: const Icon(Icons.sync_rounded),
+        ),
+        IconButton(
+          tooltip: 'Tema',
+          onPressed: () {
+            final current = ref.read(themeModeProvider);
+            final next = switch (current) {
+              ThemeMode.light => ThemeMode.dark,
+              ThemeMode.dark => ThemeMode.system,
+              ThemeMode.system => ThemeMode.light,
+            };
+            ref.read(themeModeProvider.notifier).setMode(next);
+          },
+          icon: Icon(
+            switch (ref.watch(themeModeProvider)) {
+              ThemeMode.light => Icons.light_mode_rounded,
+              ThemeMode.dark => Icons.dark_mode_rounded,
+              ThemeMode.system => Icons.brightness_auto_rounded,
+            },
+          ),
         ),
         IconButton(
           tooltip: 'Cerrar sesión',
@@ -212,25 +265,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _confirmDelete(BuildContext context, Project project) async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar proyecto'),
-        content: Text('¿Seguro quieres borrar "${project.titulo}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton.tonal(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDeleteDialog(
+      context,
+      title: 'Eliminar proyecto',
+      message: '¿Seguro quieres borrar "${project.titulo}"?',
     );
 
-    if (confirm == true) {
+    if (confirmed) {
       await ref
           .read(dashboardNotifierProvider.notifier)
           .softDeleteProject(project.localId);
@@ -339,7 +380,7 @@ class _ProjectCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: AppRadius.pill,
                     ),
                     child: Text(genre, style: theme.textTheme.labelSmall),
                   ),

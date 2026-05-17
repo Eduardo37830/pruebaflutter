@@ -18,7 +18,7 @@ GoRouter appRouter(AppRouterRef ref) {
   return GoRouter(
     initialLocation: '/onboarding',
     redirect: (context, state) {
-      if (authState.isLoading || authState is AsyncLoading) {
+      if (authState.isLoading) {
         return null;
       }
 

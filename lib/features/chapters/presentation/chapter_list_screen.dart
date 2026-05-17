@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/presentation/widgets/confirm_delete_dialog.dart';
+import '../../../../core/presentation/widgets/offline_banner.dart';
+import '../../../../core/presentation/widgets/shimmer_loading.dart';
 import '../../../../data/local/drift/app_database.dart';
 import '../application/chapters_notifier.dart';
+import '../data/chapter_repository.dart';
 
-class ChapterListScreen extends ConsumerWidget {
+class ChapterListScreen extends ConsumerStatefulWidget {
   const ChapterListScreen({
     super.key,
     required this.projectLocalId,
@@ -16,59 +22,127 @@ class ChapterListScreen extends ConsumerWidget {
   final String projectTitle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final chaptersAsync = ref.watch(chaptersByProjectProvider(projectLocalId));
+  ConsumerState<ChapterListScreen> createState() => _ChapterListScreenState();
+}
+
+class _ChapterListScreenState extends ConsumerState<ChapterListScreen> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _didInit = false;
+  Timer? _searchDebounce;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chaptersAsync = ref.watch(
+      chaptersByProjectProvider(widget.projectLocalId),
+    );
+
+    if (!_didInit) {
+      _didInit = true;
+      Future.microtask(() {
+        ref.read(chapterRepositoryProvider).refreshChaptersForProject(
+          widget.projectLocalId,
+        );
+      });
+    }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Capitulos - $projectTitle')),
-      body: chaptersAsync.when(
-        data: (chapters) {
-          if (chapters.isEmpty) {
-            return const Center(
-              child: Text('No hay capitulos. Crea el primero.'),
-            );
-          }
+      appBar: AppBar(title: Text('Capitulos - ${widget.projectTitle}')),
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Buscar capítulos...',
+                prefixIcon: Icon(Icons.search_rounded),
+                isDense: true,
+              ),
+              onChanged: (value) {
+                _searchDebounce?.cancel();
+                _searchDebounce = Timer(
+                  const Duration(milliseconds: 300),
+                  () => setState(() => _searchQuery = value.toLowerCase()),
+                );
+              },
+            ),
+          ),
+          Expanded(
+            child: chaptersAsync.when(
+              data: (chapters) {
+                final filtered = chapters.where((ch) {
+                  if (_searchQuery.isEmpty) return true;
+                  return ch.tituloCapitulo.toLowerCase().contains(_searchQuery) ||
+                      ch.contenido.toLowerCase().contains(_searchQuery);
+                }).toList();
 
-          return ListView.separated(
-            itemCount: chapters.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final chapter = chapters[index];
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Text(
+                      _searchQuery.isNotEmpty
+                          ? 'Sin resultados'
+                          : 'No hay capítulos. Crea el primero.',
+                    ),
+                  );
+                }
 
-              return ListTile(
-                title: Text(chapter.tituloCapitulo),
-                subtitle: Text(
-                  _markdownPreview(chapter.contenido),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                leading: CircleAvatar(child: Text(chapter.orden.toString())),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _confirmDelete(context, ref, chapter),
-                ),
-                onTap: () {
-                  context.push('/editor/$projectLocalId/${chapter.localId}');
-                },
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+                return RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(chapterRepositoryProvider)
+                      .refreshChaptersForProject(widget.projectLocalId),
+                  child: ReorderableListView.builder(
+                    itemCount: filtered.length,
+                    buildDefaultDragHandles: false,
+                    onReorder: (oldIndex, newIndex) {
+                      ref
+                          .read(chaptersNotifierProvider.notifier)
+                          .reorderChapter(
+                            widget.projectLocalId,
+                            oldIndex,
+                            newIndex,
+                          );
+                    },
+                    itemBuilder: (context, index) {
+                      final chapter = filtered[index];
+                      return _ChapterTile(
+                        key: ValueKey(chapter.localId),
+                        chapter: chapter,
+                        onTap: () => context.push(
+                          '/editor/${widget.projectLocalId}/${chapter.localId}',
+                        ),
+                        onDelete: () => _confirmDelete(context, chapter),
+                      );
+                    },
+                  ),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: ShimmerList(),
+              ),
+              error: (error, _) => Center(child: Text('Error: $error')),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showNewChapterDialog(context, ref),
+        onPressed: () => _showNewChapterDialog(context),
         icon: const Icon(Icons.add),
         label: const Text('Nuevo capitulo'),
       ),
     );
   }
 
-  Future<void> _showNewChapterDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _showNewChapterDialog(BuildContext context) async {
     final titleController = TextEditingController();
 
     await showDialog<void>(
@@ -82,6 +156,14 @@ class ChapterListScreen extends ConsumerWidget {
             border: OutlineInputBorder(),
           ),
           textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            final title = titleController.text.trim();
+            if (title.isEmpty) return;
+            ref
+                .read(chaptersNotifierProvider.notifier)
+                .createChapter(widget.projectLocalId, title);
+            Navigator.pop(context);
+          },
         ),
         actions: [
           TextButton(
@@ -91,12 +173,10 @@ class ChapterListScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               final title = titleController.text.trim();
-              if (title.isEmpty) {
-                return;
-              }
+              if (title.isEmpty) return;
               ref
                   .read(chaptersNotifierProvider.notifier)
-                  .createChapter(projectLocalId, title);
+                  .createChapter(widget.projectLocalId, title);
               Navigator.pop(context);
             },
             child: const Text('Crear'),
@@ -106,32 +186,60 @@ class ChapterListScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    Chapter chapter,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar capítulo'),
-        content: Text('¿Eliminar "${chapter.tituloCapitulo}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton.tonal(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+  Future<void> _confirmDelete(BuildContext context, Chapter chapter) async {
+    final confirmed = await showConfirmDeleteDialog(
+      context,
+      title: 'Eliminar capítulo',
+      message: '¿Eliminar "${chapter.tituloCapitulo}"?',
     );
 
-    if (confirm == true) {
-      ref.read(chaptersNotifierProvider.notifier).deleteChapter(chapter.localId);
+    if (confirmed) {
+      ref
+          .read(chaptersNotifierProvider.notifier)
+          .deleteChapter(chapter.localId);
     }
+  }
+}
+
+class _ChapterTile extends StatelessWidget {
+  final Chapter chapter;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _ChapterTile({
+    super.key,
+    required this.chapter,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(chapter.tituloCapitulo),
+      subtitle: Text(
+        _markdownPreview(chapter.contenido),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      leading: ReorderableDragStartListener(
+        index: 0,
+        child: CircleAvatar(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          child: Text(
+            chapter.orden.toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ),
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.delete_outline),
+        onPressed: onDelete,
+      ),
+      onTap: onTap,
+    );
   }
 
   String _markdownPreview(String markdown) {
@@ -145,10 +253,7 @@ class ChapterListScreen extends ConsumerWidget {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
-    if (normalized.isEmpty) {
-      return 'Sin contenido';
-    }
-
+    if (normalized.isEmpty) return 'Sin contenido';
     return normalized;
   }
 }

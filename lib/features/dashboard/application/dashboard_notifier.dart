@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../projects/data/project_repository.dart';
 import '../../auth/data/session_store.dart';
@@ -16,15 +17,8 @@ Stream<List<Project>> dashboardProjects(DashboardProjectsRef ref) {
 /// Controla acciones como creacion, y borrado de proyectos del tablero
 @riverpod
 class DashboardNotifier extends _$DashboardNotifier {
-  bool _didLoadRemote = false;
-
   @override
-  void build() {
-    if (!_didLoadRemote) {
-      _didLoadRemote = true;
-      Future<void>.microtask(refreshFromBackend);
-    }
-  }
+  void build() {}
 
   Future<void> refreshFromBackend() async {
     await ref.read(projectRepositoryProvider).refreshFromBackend();
@@ -37,8 +31,7 @@ class DashboardNotifier extends _$DashboardNotifier {
     }
 
     final newProject = Project(
-      localId: DateTime.now().millisecondsSinceEpoch
-          .toString(), // ID simple temporal
+      localId: const Uuid().v4(),
       titulo: titulo,
       genero: genero,
       usuarioId: usuarioId,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/presentation/widgets/ambient_circle.dart';
+import '../../../core/presentation/widgets/gradient_button.dart';
+
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
@@ -12,7 +15,7 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const _AmbientBackground(),
+          _AmbientBackground(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -41,13 +44,6 @@ class OnboardingScreen extends StatelessWidget {
                           scheme.surfaceContainerHigh,
                         ],
                       ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x1A1B1C19),
-                          blurRadius: 36,
-                          offset: Offset(0, 14),
-                        ),
-                      ],
                     ),
                     child: const Icon(Icons.auto_stories_rounded, size: 92),
                   ),
@@ -69,40 +65,10 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
+                  GradientButton(
+                    label: 'Get Started',
                     height: 56,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [scheme.primary, scheme.primaryContainer],
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x331D2B3E),
-                            blurRadius: 18,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/auth'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: const StadiumBorder(),
-                        ),
-                        child: Text(
-                          'Get Started',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: scheme.onPrimary,
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
+                    onPressed: () => context.go('/auth'),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -123,8 +89,6 @@ class OnboardingScreen extends StatelessWidget {
 }
 
 class _AmbientBackground extends StatelessWidget {
-  const _AmbientBackground();
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -145,25 +109,22 @@ class _AmbientBackground extends StatelessWidget {
         Positioned(
           top: -90,
           right: -70,
-          child: _blurCircle(scheme.surfaceContainerHigh, 260),
+          child: AmbientCircle(
+            color: scheme.surfaceContainerHigh,
+            size: 260,
+            opacity: 0.6,
+          ),
         ),
         Positioned(
           bottom: -120,
           left: -80,
-          child: _blurCircle(scheme.surfaceContainer, 320),
+          child: AmbientCircle(
+            color: scheme.surfaceContainer,
+            size: 320,
+            opacity: 0.6,
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _blurCircle(Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.6),
-        shape: BoxShape.circle,
-      ),
     );
   }
 }

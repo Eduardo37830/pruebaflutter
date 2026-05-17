@@ -48,10 +48,10 @@ class Chapters extends Table {
 /// Mapeo de la tabla de Cola de Sincronizacion
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get entityType => text()(); // 'project' o 'chapter'
+  TextColumn get entityType => text()();
   TextColumn get entityLocalId => text()();
-  TextColumn get operation => text()(); // 'create', 'update', 'delete'
-  TextColumn get payloadSnapshot => text()(); // JSON
+  TextColumn get operation => text()();
+  TextColumn get payloadSnapshot => text()();
   IntColumn get attemptCount => integer().withDefault(const Constant(0))();
   TextColumn get lastError => text().nullable()();
   IntColumn get createdAt => integer()();
@@ -66,6 +66,28 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    beforeOpen: (details) async {
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_chapters_project '
+        'ON chapters (project_local_id)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_projects_remote '
+        'ON projects (remote_id)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_chapters_remote '
+        'ON chapters (remote_id)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_queue_created '
+        'ON sync_queue (created_at)',
+      );
+    },
+  );
 }
 
 LazyDatabase _openConnection() {

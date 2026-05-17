@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/presentation/widgets/ambient_circle.dart';
+import '../../../core/presentation/widgets/gradient_button.dart';
+import '../../../core/utils/validation_constants.dart';
 import '../application/auth_notifier.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -21,20 +24,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _emailValid = true;
   bool _passwordValid = true;
 
-  static final _emailRegex = RegExp(
-    r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$",
-  );
-
   bool get _isFormValid {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    return _emailRegex.hasMatch(email) && password.length >= 6;
+    return emailRegex.hasMatch(email) && password.length >= minPasswordLength;
   }
 
   void _validateFields() {
     setState(() {
-      _emailValid = _emailRegex.hasMatch(_emailController.text.trim());
-      _passwordValid = _passwordController.text.length >= 6;
+      _emailValid = emailRegex.hasMatch(_emailController.text.trim());
+      _passwordValid = _passwordController.text.length >= minPasswordLength;
     });
   }
 
@@ -101,12 +100,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             Positioned(
               top: -90,
               right: -80,
-              child: _ambientCircle(scheme.surfaceContainerHigh, 300),
+              child: AmbientCircle(
+                color: scheme.surfaceContainerHigh,
+                size: 300,
+              ),
             ),
             Positioned(
               bottom: -120,
               left: -70,
-              child: _ambientCircle(scheme.surfaceContainer, 280),
+              child: AmbientCircle(
+                color: scheme.surfaceContainer,
+                size: 280,
+              ),
             ),
             SafeArea(
               child: Center(
@@ -205,51 +210,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            SizedBox(
-                              height: 54,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(999),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      scheme.primary,
-                                      scheme.primaryContainer,
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: scheme.shadow.withValues(alpha: 0.2),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: isLoading ? null : _login,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: const StadiumBorder(),
-                                  ),
-                                  child: isLoading
-                                      ? SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: scheme.onPrimary,
-                                          ),
-                                        )
-                                      : Text(
-                                          'Continuar',
-                                          style: theme.textTheme.labelLarge
-                                              ?.copyWith(
-                                                color: scheme.onPrimary,
-                                                letterSpacing: 0.8,
-                                              ),
-                                        ),
-                                ),
-                              ),
+                            GradientButton(
+                              label: 'Continuar',
+                              isLoading: isLoading,
+                              onPressed: isLoading ? null : _login,
                             ),
                             const SizedBox(height: 16),
                             TextButton(
@@ -270,16 +234,4 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         ),
       ),
     );
-  }
-
-  Widget _ambientCircle(Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.55),
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-}
+  }}

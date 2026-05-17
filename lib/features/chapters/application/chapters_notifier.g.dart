@@ -6,7 +6,7 @@ part of 'chapters_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chaptersByProjectHash() => r'e4fd51c5b20e9a5cb85c1cb853562a59166eb434';
+String _$chaptersByProjectHash() => r'514b63187c0706a19793d7399f0831eaf1ea7a68';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -150,7 +150,7 @@ class _ChaptersByProjectProviderElement
       (origin as ChaptersByProjectProvider).projectLocalId;
 }
 
-String _$chaptersNotifierHash() => r'681a8fe99b331b4668473ae51d4ef1193371f194';
+String _$chaptersNotifierHash() => r'9801e7f33263c7883fa94333449c4a145038cbba';
 
 /// See also [ChaptersNotifier].
 @ProviderFor(ChaptersNotifier)

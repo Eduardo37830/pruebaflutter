@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/utils/app_radius.dart';
+
 class StitchTheme {
   static const Color background = Color(0xFFF5F5F3);
   static const Color surface = Color(0xFFF5F5F3);
@@ -11,8 +13,17 @@ class StitchTheme {
   static const Color secondary = Color(0xFF606872);
   static const Color onSurface = Color(0xFF1E1E1E);
   static const Color outline = Color(0xFF7F7F78);
-  static const Color jotterpadOrange = Color(0xFFFF9800);
-  static const Color jotterpadOrangeSoft = Color(0xFFFFE0B2);
+  static const Color orange = Color(0xFFFF9800);
+  static const Color orangeSoft = Color(0xFFFFE0B2);
+  static const Color error = Color(0xFFBA1A1A);
+
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkSurfaceLow = Color(0xFF2A2A2A);
+  static const Color darkSurfaceCard = Color(0xFF2A2A2A);
+  static const Color darkPrimary = Color(0xFF9EADC5);
+  static const Color darkOnSurface = Color(0xFFE6E1E5);
+  static const Color darkOutline = Color(0xFF938F99);
 
   static ThemeData light() {
     const scheme = ColorScheme.light(
@@ -40,9 +51,9 @@ class StitchTheme {
     return base.copyWith(
       textTheme: _textTheme(base.textTheme, scheme),
       textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: jotterpadOrange,
-        selectionColor: jotterpadOrangeSoft,
-        selectionHandleColor: jotterpadOrange,
+        cursorColor: orange,
+        selectionColor: orangeSoft,
+        selectionHandleColor: orange,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -54,21 +65,21 @@ class StitchTheme {
         color: surfaceCard,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: AppRadius.pill,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: AppRadius.pill,
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: AppRadius.pill,
           borderSide: const BorderSide(color: primary, width: 1),
         ),
         hintStyle: GoogleFonts.manrope(color: outline),
@@ -77,6 +88,74 @@ class StitchTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: primary,
         contentTextStyle: GoogleFonts.manrope(color: Colors.white),
+      ),
+      dividerTheme: const DividerThemeData(space: 1, thickness: 0.6),
+    );
+  }
+
+  static ThemeData dark() {
+    const scheme = ColorScheme.dark(
+      primary: darkPrimary,
+      onPrimary: Color(0xFF1B263B),
+      primaryContainer: Color(0xFF2A3B57),
+      onPrimaryContainer: Color(0xFFD0D9E8),
+      secondary: Color(0xFFBCC7DC),
+      onSecondary: Color(0xFF2A3344),
+      tertiary: Color(0xFFD4B9A0),
+      onTertiary: Color(0xFF3B2A1C),
+      surface: darkSurface,
+      onSurface: darkOnSurface,
+      error: error,
+      onError: Colors.white,
+      outline: darkOutline,
+    );
+
+    final base = ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: darkBackground,
+    );
+
+    return base.copyWith(
+      textTheme: _textTheme(base.textTheme, scheme),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: orange,
+        selectionColor: Color(0xFF4A2800),
+        selectionHandleColor: orange,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: darkOnSurface,
+      ),
+      cardTheme: CardThemeData(
+        color: darkSurfaceCard,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurfaceLow,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.pill,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.pill,
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.pill,
+          borderSide: const BorderSide(color: darkPrimary, width: 1),
+        ),
+        hintStyle: GoogleFonts.manrope(color: darkOutline),
+        labelStyle: GoogleFonts.manrope(color: darkOutline),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: darkSurfaceCard,
+        contentTextStyle: GoogleFonts.manrope(color: darkOnSurface),
       ),
       dividerTheme: const DividerThemeData(space: 1, thickness: 0.6),
     );

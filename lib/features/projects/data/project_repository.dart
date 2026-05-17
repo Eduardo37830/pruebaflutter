@@ -3,6 +3,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/utils/type_utils.dart';
 import '../../../../data/local/drift/app_database.dart';
 import '../../../../data/local/drift/daos/chapter_dao.dart';
 import '../../../../data/local/drift/daos/project_dao.dart';
@@ -58,7 +59,7 @@ class ProjectRepository {
           continue;
         }
 
-        final remoteId = _asInt(item['id']);
+        final remoteId = asInt(item['id']);
         if (remoteId == null) {
           continue;
         }
@@ -71,7 +72,7 @@ class ProjectRepository {
           remoteId: remoteId,
           titulo: (item['titulo'] ?? '').toString(),
           genero: item['genero']?.toString(),
-          usuarioId: _asInt(item['usuario_id']) ?? userId,
+          usuarioId: asInt(item['usuario_id']) ?? userId,
           isSynced: true,
           isDeleted: false,
           lastModified: DateTime.now().millisecondsSinceEpoch,
@@ -109,7 +110,7 @@ class ProjectRepository {
       }
 
       final synced = project.copyWith(
-        remoteId: Value(_asInt(body['id'])),
+        remoteId: Value(asInt(body['id'])),
         usuarioId: Value(userId),
         isSynced: true,
         lastModified: DateTime.now().millisecondsSinceEpoch,
@@ -193,30 +194,17 @@ class ProjectRepository {
         ),
       );
     } on DioException {
-      final remoteId = existing.remoteId;
       await _syncEngine.enqueueForRetry(
         entityType: 'project',
         entityLocalId: existing.localId,
         operation: 'delete',
         payload: {
-          if (remoteId != null) 'remote_id': remoteId,
+          'remote_id': remoteId,
         },
       );
     }
   }
 
-  int? _asInt(Object? value) {
-    if (value is int) {
-      return value;
-    }
-    if (value is num) {
-      return value.toInt();
-    }
-    if (value is String) {
-      return int.tryParse(value);
-    }
-    return null;
-  }
 }
 
 @riverpod

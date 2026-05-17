@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'dio_client.dart';
@@ -22,7 +24,7 @@ class UploadService {
       final formData = FormData.fromMap({
         'imagen': await MultipartFile.fromFile(
           filePath,
-          filename: filePath.split('/').last.split('\\').last,
+          filename: p.basename(filePath),
         ),
       });
 
@@ -50,7 +52,8 @@ class UploadService {
       if (url == null || filename == null) return null;
 
       return UploadResult(url: url, filename: filename);
-    } on DioException {
+    } on DioException catch (e) {
+      debugPrint('Upload error: ${e.message}');
       return null;
     }
   }

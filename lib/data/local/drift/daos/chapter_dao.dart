@@ -62,6 +62,17 @@ class ChapterDao extends DatabaseAccessor<AppDatabase> with _$ChapterDaoMixin {
     return (maxOrder ?? 0) + 1;
   }
 
+  /// Actualiza el orden de un capítulo.
+  Future<void> updateChapterOrder(String localId, int newOrden) {
+    return (update(chapters)..where((c) => c.localId.equals(localId))).write(
+      ChaptersCompanion(
+        orden: Value(newOrden),
+        isSynced: const Value(false),
+        lastModified: Value(DateTime.now().millisecondsSinceEpoch),
+      ),
+    );
+  }
+
   /// Borrado lógico del capítulo marcando que requiere sincronización con Backend.
   Future<void> softDeleteChapter(String localId) {
     return (update(chapters)..where((c) => c.localId.equals(localId))).write(

@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/dio_client.dart';
+import '../../../core/utils/type_utils.dart';
 import '../../../data/local/drift/app_database.dart';
 import '../../../data/local/drift/daos/chapter_dao.dart';
 import '../../../data/local/drift/daos/project_dao.dart';
@@ -62,13 +63,19 @@ class SyncEngine {
       await _executeOperation(item);
 
       await _queueDao.removeById(item.id);
+    } on DioException catch (e) {
+      final transient = e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError;
+      if (transient) {
+        final newAttempt = item.attemptCount + 1;
+        await _queueDao.updateAttempt(item.id, newAttempt, e.message);
+      } else {
+        await _queueDao.removeById(item.id);
+      }
     } catch (e) {
       final newAttempt = item.attemptCount + 1;
-      await _queueDao.updateAttempt(
-        item.id,
-        newAttempt,
-        e.toString(),
-      );
+      await _queueDao.updateAttempt(item.id, newAttempt, e.toString());
     }
   }
 
@@ -125,7 +132,7 @@ class SyncEngine {
           if (project != null) {
             await _projectDao.updateProject(
               project.copyWith(
-                remoteId: Value(_asInt(body['id'])),
+                remoteId: Value(asInt(body['id'])),
                 isSynced: true,
                 lastModified:
                     DateTime.now().millisecondsSinceEpoch,
@@ -180,7 +187,7 @@ class SyncEngine {
           if (chapter != null) {
             await _chapterDao.updateChapter(
               chapter.copyWith(
-                remoteId: Value(_asInt(body['id'])),
+                remoteId: Value(asInt(body['id'])),
                 isSynced: true,
                 lastModified:
                     DateTime.now().millisecondsSinceEpoch,
@@ -228,12 +235,6 @@ class SyncEngine {
     }
   }
 
-  int? _asInt(Object? value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-    return null;
-  }
 }
 
 @Riverpod(keepAlive: true)

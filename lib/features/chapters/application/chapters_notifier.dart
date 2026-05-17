@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../data/local/drift/app_database.dart';
 import '../data/chapter_repository.dart';
@@ -11,9 +12,6 @@ Stream<List<Chapter>> chaptersByProject(
   String projectLocalId,
 ) {
   final repository = ref.watch(chapterRepositoryProvider);
-  Future<void>.microtask(() {
-    repository.refreshChaptersForProject(projectLocalId);
-  });
   return repository.watchChaptersByProject(projectLocalId);
 }
 
@@ -30,7 +28,7 @@ class ChaptersNotifier extends _$ChaptersNotifier {
     final nextOrder = await repository.getNextOrderForProject(projectLocalId);
 
     final chapter = Chapter(
-      localId: DateTime.now().microsecondsSinceEpoch.toString(),
+      localId: const Uuid().v4(),
       remoteId: null,
       tituloCapitulo: tituloCapitulo,
       contenido: '# $tituloCapitulo\n\n',
@@ -47,5 +45,27 @@ class ChaptersNotifier extends _$ChaptersNotifier {
 
   Future<void> deleteChapter(String localId) async {
     await ref.read(chapterRepositoryProvider).deleteChapter(localId);
+  }
+
+  Future<void> reorderChapter(
+    String projectLocalId,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (oldIndex == newIndex) return;
+    final adjustedNew = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    final repository = ref.read(chapterRepositoryProvider);
+    final chapters = await repository
+        .watchChaptersByProject(projectLocalId)
+        .first;
+    final reordered = List<Chapter>.from(chapters);
+    final moved = reordered.removeAt(oldIndex);
+    reordered.insert(adjustedNew, moved);
+    for (var i = 0; i < reordered.length; i++) {
+      await repository.updateChapterOrder(
+        reordered[i].localId,
+        i + 1,
+      );
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/dio_client.dart';
+import '../../../core/utils/type_utils.dart';
 import '../data/session_store.dart';
 
 part 'auth_notifier.g.dart';
@@ -35,7 +36,7 @@ class AuthNotifier extends _$AuthNotifier {
       }
 
       final user = body['user'];
-      final userId = user is Map ? _asInt(user['id']) : null;
+      final userId = user is Map ? asInt(user['id']) : null;
 
       await sessionStore.saveToken(token);
       if (userId != null) {
@@ -71,7 +72,7 @@ class AuthNotifier extends _$AuthNotifier {
       }
 
       final user = body['user'];
-      final userId = user is Map ? _asInt(user['id']) : null;
+      final userId = user is Map ? asInt(user['id']) : null;
 
       await sessionStore.saveToken(token);
       if (userId != null) {
@@ -101,18 +102,5 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     return error.message ?? 'Error de conexion con el servidor';
-  }
-
-  int? _asInt(Object? value) {
-    if (value is int) {
-      return value;
-    }
-    if (value is num) {
-      return value.toInt();
-    }
-    if (value is String) {
-      return int.tryParse(value);
-    }
-    return null;
   }
 }
